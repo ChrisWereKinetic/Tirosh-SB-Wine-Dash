@@ -7,6 +7,7 @@ import re
 import datetime
 import requests
 from pytrends.request import TrendReq
+import altair as alt
 
 
 def extract_nz_bulk_price_from_pdf(pdf_path):
@@ -75,7 +76,15 @@ st.markdown("Add SB Productions stats from NZ winegrowers")
 st.header("💱 Historical Exchange Rates (Since Jan 2018)")
 fx_df = get_historical_exchange_rates()
 fx_df = fx_df[fx_df["Date"] >= "2018-01-01"]
-st.line_chart(fx_df.set_index("Date"))
+# st.line_chart(fx_df.set_index("Date"))
+chart = alt.Chart(fx_df).transform_fold(
+    ["USD", "GBP", "EUR"], as_=["Currency", "Rate"]
+).mark_line().encode(
+    x=alt.X("Date:T", axis=alt.Axis(format="%Y-%m", title="Date")),
+    y=alt.Y("Rate:Q", title="Exchange Rate"),
+    color="Currency:N"
+).properties(title="NZD Exchange Rates", width=700, height=400)
+st.altair_chart(chart, use_container_width=True)
 
 
 st.header("📊 NZ Marlborough SB Bulk Price History")
@@ -113,7 +122,15 @@ if price_history:
     st.dataframe(df)
 
     pivot_df = df.pivot(index="Report Date", columns="Vintage", values="Mid Price")
-    st.line_chart(pivot_df)
+    # st.line_chart(pivot_df)
+    df_melted = df[["Report Date", "Vintage", "Mid Price"]].copy()
+    df_melted["Report Date"] = pd.to_datetime(df_melted["Report Date"])
+    chart = alt.Chart(df_melted).mark_line().encode(
+        x=alt.X("Report Date:T", axis=alt.Axis(format="%Y-%m", title="Date")),
+        y=alt.Y("Mid Price:Q", title="Mid Price (NZD)"),
+        color="Vintage:N"
+    ).properties(title="Marlborough SB Bulk Price", width=700, height=400)
+    st.altair_chart(chart, use_container_width=True)    
 else:
     st.warning("No vintage price data found in available reports.")
 
@@ -173,7 +190,14 @@ if os.path.exists(export_file):
     export_df = export_df.rename(columns={"Exports (million L)": "Volume (M L)"})
     export_df = export_df[["Date", "Volume (M L)"]]
     st.markdown("**Source:** [Stats NZ](https://www.stats.govt.nz/) — Overseas Merchandise Trade Feb 2025")
-    st.line_chart(export_df.set_index("Date"))
+    # st.line_chart(export_df.set_index("Date"))
+    chart = alt.Chart(export_df).mark_line().encode(
+        x=alt.X("Date:T", axis=alt.Axis(format="%Y-%m", title="Date")),
+        y=alt.Y("Volume (M L):Q", title="Volume (M L)")
+    ).properties(title="NZ Wine Exports", width=700, height=400)
+    st.altair_chart(chart, use_container_width=True)
+
+
    
 else:
     st.warning("Export file not found: nz wine exports.csv")
@@ -185,6 +209,12 @@ trend_term = st.selectbox("Choose a search term", ["Sauvignon Blanc", "NZ Wine",
 trend_data = get_trend_data(trend_term, region="NZ")
 # trend_data = trend_data[trend_data.index >= "2022-06-01"]
 if not trend_data.empty:
-    st.line_chart(trend_data)
+    # st.line_chart(trend_data)
+    trend_df = trend_data.reset_index()
+    chart = alt.Chart(trend_df).mark_line().encode(
+        x=alt.X("date:T", axis=alt.Axis(format="%Y-%m", title="Date")),
+        y=alt.Y(f"{trend_term}:Q", title="Search Interest")
+    ).properties(title=f"Google Trends: {trend_term}", width=700, height=400)
+    st.altair_chart(chart, use_container_width=True)
 else:
     st.warning("No trend data available for the selected term.")
