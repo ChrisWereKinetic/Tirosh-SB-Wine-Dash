@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+env/
+venv/
+
+# macOS metadata
+.DS_Store
+
+# VSCode settings folder
+.vscode/
+
+# Streamlit local folder
+.streamlit/
+
+# If you’re tracking PDFs via Git LFS, you could exclude raw PDFs too:
+# Ciatti Reports/*.pdf
