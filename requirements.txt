@@ -3,3 +3,4 @@ pandas
 PyMuPDF
 glob2
 regex
+pytrends
