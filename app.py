@@ -40,7 +40,7 @@ def extract_nz_bulk_price_from_pdf(pdf_path):
 
 @st.cache_data
 def get_historical_exchange_rates():
-    start_date = "2022-06-01"
+    start_date = "2018-01-01"
     end_date = datetime.date.today().isoformat()
     url = f"https://api.frankfurter.app/{start_date}..{end_date}?from=NZD&to=USD,GBP,EUR"
     try:
@@ -72,9 +72,9 @@ st.header("🚢 TODO...")
 st.markdown("Add SB Productions stats from NZ winegrowers")
 
 # Exchange Rates Section
-st.header("💱 Historical Exchange Rates (Since June 2022)")
+st.header("💱 Historical Exchange Rates (Since Jan 2018)")
 fx_df = get_historical_exchange_rates()
-fx_df = fx_df[fx_df["Date"] >= "2022-06-01"]
+fx_df = fx_df[fx_df["Date"] >= "2018-01-01"]
 st.line_chart(fx_df.set_index("Date"))
 
 
@@ -108,7 +108,7 @@ if price_history:
     df = pd.DataFrame(price_history)
     df = df.dropna(subset=['Report Date'])
     df = df.sort_values(by=['Report Date', 'Vintage'])
-    df = df[df["Report Date"] >= datetime.date(2022, 6, 1)]
+    # df = df[df["Report Date"] >= datetime.date(2022, 6, 1)]
     st.markdown("**Source:** Ciatti Global Market Reports (local PDFs in `Ciatti Reports` folder)")
     st.dataframe(df)
 
@@ -169,7 +169,7 @@ if os.path.exists(export_file):
     export_df = export_df.dropna(subset=["Date"])
 
     export_df = export_df.sort_values("Date")
-    export_df = export_df[export_df["Date"] >= "2022-06-01"]
+    # export_df = export_df[export_df["Date"] >= "2022-06-01"]
     export_df = export_df.rename(columns={"Exports (million L)": "Volume (M L)"})
     export_df = export_df[["Date", "Volume (M L)"]]
     st.markdown("**Source:** [Stats NZ](https://www.stats.govt.nz/) — Overseas Merchandise Trade Feb 2025")
@@ -183,7 +183,7 @@ else:
 st.header("📈 Google Trends: Interest Over Time")
 trend_term = st.selectbox("Choose a search term", ["Sauvignon Blanc", "NZ Wine", "Marlborough wine"])
 trend_data = get_trend_data(trend_term, region="NZ")
-trend_data = trend_data[trend_data.index >= "2022-06-01"]
+# trend_data = trend_data[trend_data.index >= "2022-06-01"]
 if not trend_data.empty:
     st.line_chart(trend_data)
 else:
